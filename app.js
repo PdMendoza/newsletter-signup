@@ -3,13 +3,14 @@ const bodyParser = require("body-parser");
 const https = require("https");
 const request = require("request");
 const mailchimp = require("@mailchimp/mailchimp_marketing");
+require("dotenv").config();
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 const app = express();
 
 mailchimp.setConfig({
-  apiKey: "bd45645e9fe5ff5e8a91b4e9fc162860-us21",
-  server: "us21",
+  apiKey: process.env.API_KEY,
+  server: process.env.SERVER_CODE,
 });
 
 // for the server to be able to use static files such as css and images, a folder where they are must be specified
@@ -41,9 +42,12 @@ app.post("/", (req, res) => {
   // send request data to the mailchimp server
   async function run() {
     try {
-      const response = await mailchimp.lists.batchListMembers("12cb840f5c", {
-        members,
-      });
+      const response = await mailchimp.lists.batchListMembers(
+        process.env.LIST_ID,
+        {
+          members,
+        }
+      );
       if (response) {
         res.redirect("/success");
       }
@@ -59,4 +63,4 @@ app.post("/", (req, res) => {
 
 app.post("/failure", (req, res) => res.redirect("/"));
 
-app.listen(port || 3000, () => console.log(`App listening on port ${port}!`));
+app.listen(port, () => console.log(`App listening on port ${port}!`));
